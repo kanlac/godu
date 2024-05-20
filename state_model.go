@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/mattn/go-runewidth"
 	"github.com/viktomas/godu/commands"
 	"github.com/viktomas/godu/interactive"
 )
@@ -48,8 +49,17 @@ func (vs visualState) GetCell(x, y int) (rune, tcell.Style, []rune, int) {
 	if line.IsMarked {
 		style = style.Foreground(tcell.ColorGreen)
 	}
-	if x < len(vs.folders[shiftedIndex].Text) {
-		return line.Text[x], style, nil, 1
+
+	visualIndex := 0
+	for _, r := range line.Text {
+		width := runewidth.RuneWidth(r)
+		if visualIndex == x {
+			return r, style, nil, width
+		}
+		visualIndex += width
+		if visualIndex > x {
+			break
+		}
 	}
 	return ' ', style, nil, 1
 }
